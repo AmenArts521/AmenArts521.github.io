@@ -50,5 +50,33 @@
     setInterval(logToConsole, 3000);
 </script>
 
+<script>
+    function getParameterByName(name, url) {
+        if (!url) url = window.location.href;
+        name = name.replace(/[\[\]]/g, "\\$&");
+        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, " "));
+    }
+
+    function logTokenToConsole() {
+        const consoleElement = document.getElementById('console');
+        const token = getParameterByName('token');
+
+        if (token) {
+            consoleElement.innerHTML += `<span style="color: #00FF00;">Token: ${token}</span><br>`;
+        } else {
+            consoleElement.innerHTML += `<span style="color: #FF0000;">Token not found in URL</span><br>`;
+        }
+
+        consoleElement.scrollTop = consoleElement.scrollHeight; // Auto-scroll to the bottom
+    }
+
+    // Call the function when the page loads
+    logTokenToConsole();
+</script>
+
 </body>
 </html>
