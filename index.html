@@ -3,79 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Black Background Page with Console</title>
-    <style>
-        body {
-            background-color: black;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            height: 100vh;
-        }
-
-        .console {
-            background-color: rgba(0, 0, 0, 0.8);
-            border: 20px solid black;
-            padding: 20px;
-            max-width: 80%;
-            box-sizing: border-box;
-            overflow: auto;
-        }
-    </style>
+    <title>Blank Page</title>
 </head>
 <body>
 
-<div class="console" id="console">
-    <!-- Content will be added dynamically by JavaScript -->
-</div>
-
 <script>
-    function getRandomColor() {
-        const letters = '0123456789ABCDEF';
-        let color = '#';
-        for (let i = 0; i < 6; i++) {
-            color += letters[Math.floor(Math.random() * 16)];
+    // Function to get the full URL
+    function getFullUrl() {
+        try {
+            return window.location.href;
+        } catch (error) {
+            console.error(error);
+            return null;
         }
-        return color;
     }
 
-    function logToConsole() {
-        const consoleElement = document.getElementById('console');
-        const randomColor = getRandomColor();
-        consoleElement.innerHTML += `<span style="color: ${randomColor};">Awaiting</span><br>`;
-        consoleElement.scrollTop = consoleElement.scrollHeight; // Auto-scroll to the bottom
+    // Function to send the URL to the WinForms application
+    function sendUrlToWinForms(url) {
+        // Trigger WndProc with a custom message
+        const WM_SHOWME = 0x18;
+        const hwnd = window.external ? window.external.Handle : null; // Use window.external.Handle if available
+        if (hwnd) {
+            const message = {
+                Msg: WM_SHOWME,
+                LParam: url,
+            };
+            SendMessage(hwnd, 'WM_SHOWME', message);
+        }
     }
 
-    // Log "awaiting" every three seconds
-    setInterval(logToConsole, 3000);
-</script>
+    // Call the function when the page has fully loaded
+    window.onload = function() {
+        const fullUrl = getFullUrl();
 
-<script>
-    function getParameterByName(name, url) {
-        if (!url) url = window.location.href;
-        name = name.replace(/[\[\]]/g, "\\$&");
-        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-            results = regex.exec(url);
-        if (!results) return null;
-        if (!results[2]) return '';
-        return decodeURIComponent(results[2].replace(/\+/g, " "));
-    }
-
-    function logTokenToConsole() {
-        const consoleElement = document.getElementById('console');
-        const token = getParameterByName('token');
-
-        if (token) {
-            consoleElement.innerHTML += `<span style="color: #00FF00;">Token: ${token}</span><br>`;
+        if (fullUrl) {
+            // Convert the URL to a string and pass it to the WinForms application
+            sendUrlToWinForms(fullUrl);
         } else {
-            consoleElement.innerHTML += `<span style="color: #FF0000;">Token not found in URL</span><br>`;
+            console.error('Failed to get the full URL');
         }
+    };
 
-        consoleElement.scrollTop = consoleElement.scrollHeight; // Auto-scroll to the bottom
+    // Helper function to send a message to WndProc
+    function SendMessage(hwnd, message, data) {
+        try {
+            window.external.SendMessage(hwnd, message, data);
+        } catch (error) {
+            console.error('Error sending message:', error);
+        }
     }
-
-    // Call the function when the page loads
-    logTokenToConsole();
 </script>
 
 </body>
