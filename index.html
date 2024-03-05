@@ -24,9 +24,9 @@
         fetch('http://localhost:8080/urlendpoint', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'text/plain', // Set the content type to plain text
             },
-            body: JSON.stringify({ url: url }),
+            body: url, // Send the URL as the plain body
         })
         .then(response => {
             if (!response.ok) {
