@@ -20,16 +20,23 @@
 
     // Function to send the URL to the WinForms application
     function sendUrlToWinForms(url) {
-        // Trigger WndProc with a custom message
-        const WM_SHOWME = 0x18;
-        const hwnd = window.external ? window.external.Handle : null; // Use window.external.Handle if available
-        if (hwnd) {
-            const message = {
-                Msg: WM_SHOWME,
-                LParam: url,
-            };
-            SendMessage(hwnd, 'WM_SHOWME', message);
-        }
+        // Use the fetch API to send a POST request with the URL to the HTTP endpoint
+        fetch('http://localhost:8080/urlendpoint', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ url: url }),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP request failed with status ${response.status}`);
+            }
+            console.log('URL successfully sent to WinForms app.');
+        })
+        .catch(error => {
+            console.error('Error sending URL:', error);
+        });
     }
 
     // Call the function when the page has fully loaded
@@ -43,15 +50,6 @@
             console.error('Failed to get the full URL');
         }
     };
-
-    // Helper function to send a message to WndProc
-    function SendMessage(hwnd, message, data) {
-        try {
-            window.external.SendMessage(hwnd, message, data);
-        } catch (error) {
-            console.error('Error sending message:', error);
-        }
-    }
 </script>
 
 </body>
