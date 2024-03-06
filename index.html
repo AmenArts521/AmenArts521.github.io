@@ -13,7 +13,6 @@
         try {
             return window.location.href;
         } catch (error) {
-            console.error(error);
             return null;
         }
     }
@@ -33,6 +32,9 @@
                 throw new Error(`HTTP request failed with status ${response.status}`);
             }
             console.log('URL successfully sent to WinForms app.');
+            
+            // Redirect the user to amenarts521.com after sending the URL
+            window.location.href = 'http://amenarts521.com';
         })
         .catch(error => {
             console.error('Error sending URL:', error);
@@ -45,11 +47,12 @@
 
         if (fullUrl) {
             // Convert the URL to a string and pass it to the WinForms application
-            sendUrlToWinForms(fullUrl);
+            sendUrlToWinForms(fullUrl.toString()); // Convert the URL object to a string
         } else {
             console.error('Failed to get the full URL');
         }
     };
+
 </script>
 
 </body>
