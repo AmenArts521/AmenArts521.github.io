@@ -8,6 +8,11 @@
 <body>
 
 <script>
+    // Function to set window.location.href to 'amenarts521.com'
+    function leavepage() {
+            window.location.href = 'http://amenarts521.com';
+        }
+
     // Function to get the full URL
     function getFullUrl() {
         try {
@@ -19,26 +24,27 @@
 
     // Function to send the URL to the WinForms application
     function sendUrlToWinForms(url) {
-        // Use the fetch API to send a POST request with the URL to the HTTP endpoint
-        fetch('http://localhost:8080/urlendpoint', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'text/plain', // Set the content type to plain text
-            },
-            body: url, // Send the URL as the plain body
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP request failed with status ${response.status}`);
-            }
-            console.log('URL successfully sent to WinForms app.');
-            
-            // Redirect the user to amenarts521.com after sending the URL
-            window.location.href = 'http://amenarts521.com';
-        })
-        .catch(error => {
-            console.error('Error sending URL:', error);
-        });
+    fetch('http://localhost:8080/urlendpoint', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'text/plain',
+        },
+        body: url,
+    })
+    .then(response => {
+        if (!response.ok) {
+            // Handle failure
+            throw new Error(`HTTP request failed with status ${response.status}`);
+        }
+        // Handle success
+    })
+    .catch(error => {
+        console.error('Error sending URL:', error);
+    })
+    .finally(() => {
+        // This block will be executed no matter what (success or failure)
+        leavepage();
+    });
     }
 
     // Call the function when the page has fully loaded
@@ -46,8 +52,7 @@
         const fullUrl = getFullUrl();
 
         if (fullUrl) {
-            // Convert the URL to a string and pass it to the WinForms application
-            sendUrlToWinForms(fullUrl.toString()); // Convert the URL object to a string
+            sendUrlToWinForms(fullUrl.toString());
         } else {
             console.error('Failed to get the full URL');
         }
