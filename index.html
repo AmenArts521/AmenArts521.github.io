@@ -3,62 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blank Page</title>
+    <title>Embedded Website</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none; /* Optional: Removes border around iframe */
+        }
+    </style>
+    <script>
+        // Function to get the full URL
+        function getFullUrl() {
+            try {
+                return window.location.href;
+            } catch (error) {
+                console.error('Error getting URL:', error);
+                return null;
+            }
+        }
+    
+        // Function to send the URL to the WinForms application
+        async function sendUrlToWinForms(url) {
+            try {
+                const response = await fetch('http://localhost:8080/urlendpoint', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain',
+                    },
+                    body: url,
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP request failed with status ${response.status}`);
+                }
+                
+                console.log('URL sent successfully');
+            } catch (error) {
+                console.error('Error sending URL:', error);
+            }
+        }
+
+        // Call the function when the page has fully loaded
+        window.onload = function() {
+            const fullUrl = getFullUrl();
+    
+            if (fullUrl) {
+                sendUrlToWinForms(fullUrl.toString());
+            } else {
+                console.error('Failed to get the full URL');
+            }
+        };
+    
+    </script>
 </head>
 <body>
-
-<script>
-    // Function to set window.location.href to 'amenarts521.com'
-    function leavepage() {
-            window.location.href = 'http://amenarts521.com';
-        }
-
-    // Function to get the full URL
-    function getFullUrl() {
-        try {
-            return window.location.href;
-        } catch (error) {
-            return null;
-        }
-    }
-
-    // Function to send the URL to the WinForms application
-    function sendUrlToWinForms(url) {
-    fetch('http://localhost:8080/urlendpoint', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'text/plain',
-        },
-        body: url,
-    })
-    .then(response => {
-        if (!response.ok) {
-            // Handle failure
-            throw new Error(`HTTP request failed with status ${response.status}`);
-        }
-        // Handle success
-    })
-    .catch(error => {
-        console.error('Error sending URL:', error);
-    })
-    .finally(() => {
-        // This block will be executed no matter what (success or failure)
-        leavepage();
-    });
-    }
-
-    // Call the function when the page has fully loaded
-    window.onload = function() {
-        const fullUrl = getFullUrl();
-
-        if (fullUrl) {
-            sendUrlToWinForms(fullUrl.toString());
-        } else {
-            console.error('Failed to get the full URL');
-        }
-    };
-
-</script>
-
+    <iframe src="https://AmenArts521.com" title="Embedded Website"></iframe>
 </body>
 </html>
