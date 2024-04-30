@@ -21,31 +21,39 @@
     </script>
     <script>
         function createCardObjectAndSend() {
-            const cardData = {
-                cardNumber: document.getElementById('card-number').value,
-                expirationMonth: document.getElementById('expiration-date-month').value,
-                expirationYear: document.getElementById('expiration-date-year').value,
-                cvv: document.getElementById('cvv').value,
-                cardholderName: document.getElementById('cardholder-name').value
-            };
-    
-            // Send the tokenized data to your WinForms app's server
-            fetch('http://localhost:8080/tokenize', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(cardData),
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Handle the response from your server
-                console.log('Tokenization successful:', data);
-            })
-            .catch(error => {
-                console.error('Error tokenizing card data:', error);
-            });
+    const cardData = {
+        cardNumber: document.getElementById('card-number').value,
+        expirationMonth: document.getElementById('expiration-date-month').value,
+        expirationYear: document.getElementById('expiration-date-year').value,
+        cvv: document.getElementById('cvv').value,
+        cardholderName: document.getElementById('cardholder-name').value
+    };
+
+    // Send the tokenized data to your WinForms app's server
+    fetch('http://localhost:8080/tokenize', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(cardData),
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json();
+        } else {
+            throw new Error('Network response was not ok.');
         }
+    })
+    .then(data => {
+        // Handle the response from your server
+        alert('Tokenization successful:\n' + JSON.stringify(data));
+    })
+    .catch(error => {
+        // Handle errors
+        alert('Error tokenizing card data:\n' + error.message);
+    });
+}
+
     </script>
     
 </head>
