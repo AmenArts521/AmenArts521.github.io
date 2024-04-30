@@ -3,65 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Embedded Website</title>
-    <style>
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-        }
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none; /* Optional: Removes border around iframe */
-        }
-    </style>
+    <title>Square Payments API</title>
+    <!-- Load the Square Web Payments SDK with placeholders for your application ID and location ID -->
     <script>
-        // Function to get the full URL
-        function getFullUrl() {
-            try {
-                return window.location.href;
-            } catch (error) {
-                console.error('Error getting URL:', error);
-                return null;
-            }
-        }
-    
-        // Function to send the URL to the WinForms application
-        async function sendUrlToWinForms(url) {
-            try {
-                const response = await fetch('http://localhost:8080/urlendpoint', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'text/plain',
-                    },
-                    body: url,
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP request failed with status ${response.status}`);
-                }
-                
-                console.log('URL sent successfully');
-            } catch (error) {
-                console.error('Error sending URL:', error);
-            }
-        }
-
-        // Call the function when the page has fully loaded
-        window.onload = function() {
-            const fullUrl = getFullUrl();
-    
-            if (fullUrl) {
-                sendUrlToWinForms(fullUrl.toString());
-            } else {
-                console.error('Failed to get the full URL');
-            }
-        };
-    
+        const APPLICATION_ID = '{sq0idp-9IKcLr1DSTt739yo99tGoA}';
+        const LOCATION_ID = '{LN6RZRPAYQ028}';
+        const SQUARE_API_URL = 'https://web.squarecdn.com/v1/square.js'; // Production URL
+        
+        // Load the Square Web Payments SDK dynamically
+        (function(d, s, id){
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) {return;}
+            js = d.createElement(s); js.id = id;
+            js.src = SQUARE_API_URL;
+            fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'square-payments-sdk'));
     </script>
+    <script>
+        function createCardObjectAndSend() {
+            const cardData = {
+                cardNumber: document.getElementById('card-number').value,
+                expirationMonth: document.getElementById('expiration-date-month').value,
+                expirationYear: document.getElementById('expiration-date-year').value,
+                cvv: document.getElementById('cvv').value,
+                cardholderName: document.getElementById('cardholder-name').value
+            };
+    
+            // Send the tokenized data to your WinForms app's server
+            fetch('http://localhost:8080/tokenize', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(cardData),
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Handle the response from your server
+                console.log('Tokenization successful:', data);
+            })
+            .catch(error => {
+                console.error('Error tokenizing card data:', error);
+            });
+        }
+    </script>
+    
 </head>
 <body>
-    <iframe src="https://AmenArts521.com" title="Embedded Website"></iframe>
+    <h1>Coven Mechant</h1>
+    <form id="payment-form">
+        <div>
+            <label for="card-number">Card Number:</label>
+            <input type="text" id="card-number" maxlength="16" required>
+        </div>
+        <div>
+            <label for="expiration-date">Expiration Date:</label>
+            <input type="text" id="expiration-date-month" maxlength="2" placeholder="MM" required>
+            <span>/</span>
+            <input type="text" id="expiration-date-year" maxlength="2" placeholder="YY" required>
+        </div>
+        <div>
+            <label for="cvv">CVV:</label>
+            <input type="text" id="cvv" maxlength="3" required>
+        </div>
+        <div>
+            <label for="cardholder-name">Cardholder Name:</label>
+            <input type="text" id="cardholder-name" required>
+        </div>
+        <button type="button" onclick="createCardObjectAndSend()">Tokenize and Send Data</button>
+    </form>
 </body>
 </html>
