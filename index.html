@@ -4,7 +4,7 @@
     <link href="/app.css" rel="stylesheet" />
     <script type="text/javascript" src="https://sandbox.web.squarecdn.com/v1/square.js"></script>
     <script>
-        const appId = 'sq0idp-9IKcLr1DSTt739yo99tGoA';
+        const applicationId = 'sq0idp-9IKcLr1DSTt739yo99tGoA';
         const locationId = 'LN6RZRPAYQ028';
 
         async function initializeCard(payments) {
@@ -96,11 +96,7 @@
                     cardButton.disabled = true;
                     try {
                         const token = await tokenize(card);
-                        const verificationToken = await verifyBuyer(payments, token);
-                        const paymentResults = await createPayment(
-                            token,
-                            verificationToken,
-                        );
+                        const paymentResults = await createPayment(token);
                         displayPaymentResults('SUCCESS');
 
                         console.debug('Payment Success', paymentResults);
@@ -110,6 +106,7 @@
                         window.alert('Payment failed: ' + error.message);
                     }
                 });
+
             } catch (error) {
                 window.alert(error.message);
             }
