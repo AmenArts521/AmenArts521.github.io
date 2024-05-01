@@ -1,114 +1,126 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Square Payments API</title>
-    <!-- Load the Square Web Payments SDK with placeholders for your application ID and location ID -->
+    <link href="/app.css" rel="stylesheet" />
+    <script type="text/javascript" src="https://sandbox.web.squarecdn.com/v1/square.js"></script>
     <script>
-        const APPLICATION_ID = '{sq0idp-9IKcLr1DSTt739yo99tGoA}';
-        const LOCATION_ID = '{LN6RZRPAYQ028}';
-        const SQUARE_API_URL = 'https://web.squarecdn.com/v1/square.js'; // Production URL
-        
-        // Load the Square Web Payments SDK dynamically
-        (function(d, s, id){
-            var js, fjs = d.getElementsByTagName(s)[0];
-            if (d.getElementById(id)) {return;}
-            js = d.createElement(s); js.id = id;
-            js.src = SQUARE_API_URL;
-            fjs.parentNode.insertBefore(js, fjs);
-        }(document, 'script', 'square-payments-sdk'));
+        const appId = '{sq0idp-9IKcLr1DSTt739yo99tGoA}';
+        const locationId = '{LN6RZRPAYQ028}';
 
-        function enableTextboxes() {
-            document.getElementById('card-number').disabled = false;
-            document.getElementById('expiration-date-month').disabled = false;
-            document.getElementById('expiration-date-year').disabled = false;
-            document.getElementById('cvv').disabled = false;
-            document.getElementById('cardholder-name').disabled = false;
+        async function initializeCard(payments) {
+            const card = await payments.card();
+            await card.attach('#card-container');
+
+            return card;
         }
 
-        function disableTextboxes() {
-            document.getElementById('card-number').disabled = true;
-            document.getElementById('expiration-date-month').disabled = true;
-            document.getElementById('expiration-date-year').disabled = true;
-            document.getElementById('cvv').disabled = true;
-            document.getElementById('cardholder-name').disabled = true;
-        }
+        async function createPayment(token, verificationToken) {
+            const body = JSON.stringify({
+                locationId,
+                sourceId: token,
+                verificationToken,
+                idempotencyKey: window.crypto.randomUUID(),
+            });
 
-        function createCardObjectAndSend() {
-            disableTextboxes(); // Disable textboxes before sending request
-
-            const cardData = {
-                cardNumber: document.getElementById('card-number').value,
-                expirationMonth: document.getElementById('expiration-date-month').value,
-                expirationYear: document.getElementById('expiration-date-year').value,
-                cvv: document.getElementById('cvv').value,
-                cardholderName: document.getElementById('cardholder-name').value
-            };
-
-            // Send the tokenized data to your WinForms app's server
-            fetch('http://localhost:8080/tokenize', {
+            const paymentResponse = await fetch('http://localhost:8080/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(cardData),
-            })
-            .then(response => {
-                enableTextboxes(); // Enable textboxes after request completes
+                body,
+            });
 
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    throw new Error('Network response was not ok.');
+            if (paymentResponse.ok) {
+                return paymentResponse.json();
+            }
+
+            const errorBody = await paymentResponse.text();
+            throw new Error(errorBody);
+        }
+
+        async function tokenize(paymentMethod) {
+            const tokenResult = await paymentMethod.tokenize();
+            if (tokenResult.status === 'OK') {
+                return tokenResult.token;
+            } else {
+                let errorMessage = `Tokenization failed with status: ${tokenResult.status}`;
+                if (tokenResult.errors) {
+                    errorMessage += ` and errors: ${JSON.stringify(tokenResult.errors)}`;
                 }
-            })
-            .then(data => {
-                // Handle the response from your server
-                console.log('Tokenization successful:', data);
-            })
-            .catch(error => {
-                enableTextboxes(); // Enable textboxes after request completes
 
-                console.error('Error tokenizing card data:', error);
-            });
+                throw new Error(errorMessage);
+            }
         }
 
-        function checkServerConnection() {
-            fetch('http://localhost:8080') // Attempt to connect to the server
-            .then(() => {
-                alert('Connection to server successful');
-            })
-            .catch(() => {
-                alert('Failed to connect to server');
-            });
+        // status is either SUCCESS or FAILURE;
+        function displayPaymentResults(status) {
+            const statusContainer = document.getElementById(
+                'payment-status-container',
+            );
+            if (status === 'SUCCESS') {
+                statusContainer.classList.remove('is-failure');
+                statusContainer.classList.add('is-success');
+            } else {
+                statusContainer.classList.remove('is-success');
+                statusContainer.classList.add('is-failure');
+            }
+
+            statusContainer.style.visibility = 'visible';
         }
+
+        document.addEventListener('DOMContentLoaded', async function () {
+            try {
+                if (!window.Square) {
+                    throw new Error('Square.js failed to load properly');
+                }
+
+                let payments;
+                try {
+                    payments = window.Square.payments(appId, locationId);
+                } catch (error) {
+                    throw new Error('Failed to initialize Square payments: ' + error.message);
+                }
+
+                let card;
+                try {
+                    card = await initializeCard(payments);
+                } catch (error) {
+                    throw new Error('Failed to initialize card: ' + error.message);
+                }
+
+                const cardButton = document.getElementById('card-button');
+                cardButton.addEventListener('click', async function (event) {
+                    event.preventDefault();
+
+                    // disable the submit button as we await tokenization and make a payment request.
+                    cardButton.disabled = true;
+                    try {
+                        const token = await tokenize(card);
+                        const verificationToken = await verifyBuyer(payments, token);
+                        const paymentResults = await createPayment(
+                            token,
+                            verificationToken,
+                        );
+                        displayPaymentResults('SUCCESS');
+
+                        console.debug('Payment Success', paymentResults);
+                    } catch (error) {
+                        cardButton.disabled = false;
+                        displayPaymentResults('FAILURE');
+                        window.alert('Payment failed: ' + error.message);
+                    }
+                });
+            } catch (error) {
+                window.alert(error.message);
+            }
+        });
     </script>
-    
 </head>
 <body>
-    <h1>Coven Mechant</h1>
-    <label id="connection-status" onclick="checkServerConnection()">Check Connection</label>
     <form id="payment-form">
-        <div>
-            <label for="card-number">Card Number:</label>
-            <input type="text" id="card-number" maxlength="16" required>
-        </div>
-        <div>
-            <label for="expiration-date">Expiration Date:</label>
-            <input type="text" id="expiration-date-month" maxlength="2" placeholder="MM" required>
-            <span>/</span>
-            <input type="text" id="expiration-date-year" maxlength="2" placeholder="YY" required>
-        </div>
-        <div>
-            <label for="cvv">CVV:</label>
-            <input type="text" id="cvv" maxlength="3" required>
-        </div>
-        <div>
-            <label for="cardholder-name">Cardholder Name:</label>
-            <input type="text" id="cardholder-name" required>
-        </div>
-        <button type="button" onclick="createCardObjectAndSend()">Tokenize and Send Data</button>
+        <div id="card-container"></div>
+        <button id="card-button" type="button">Pay $1.00</button>
     </form>
+    <div id="payment-status-container"></div>
 </body>
 </html>
