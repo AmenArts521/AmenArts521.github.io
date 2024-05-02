@@ -2,10 +2,10 @@
 <html>
 <head>
     <link href="/app.css" rel="stylesheet" />
-    <script type="text/javascript" src="https://web.squarecdn.com/v1/square.js"></script>
+    <script type="text/javascript" src="https://sandbox.web.squarecdn.com/v1/square.js"></script>
     <script>
-        const appId = 'sq0idp-PY4VamgC3T2exiDYhwYZow';
-        const locationId = 'LN6RZRPAYQ028';
+        const appId = '{APPLICATION_ID}';
+        const locationId = '{LOCATION_ID}';
 
         async function initializeCard(payments) {
             const card = await payments.card();
@@ -52,6 +52,30 @@
             }
         }
 
+        async function verifyBuyer(payments, token) {
+            const verificationDetails = {
+                amount: '1.00',
+                billingContact: {
+                    givenName: 'John',
+                    familyName: 'Doe',
+                    email: 'john.doe@square.example',
+                    phone: '3214563987',
+                    addressLines: ['123 Main Street', 'Apartment 1'],
+                    city: 'London',
+                    state: 'LND',
+                    countryCode: 'GB',
+                },
+                currencyCode: 'GBP',
+                intent: 'CHARGE',
+            };
+
+            const verificationResults = await payments.verifyBuyer(
+                token,
+                verificationDetails,
+            );
+            return verificationResults.token;
+        }
+
         // status is either SUCCESS or FAILURE;
         function displayPaymentResults(status) {
             const statusContainer = document.getElementById(
@@ -96,7 +120,11 @@
                     cardButton.disabled = true;
                     try {
                         const token = await tokenize(card);
-                        const paymentResults = await createPayment(token);
+                        const verificationToken = await verifyBuyer(payments, token);
+                        const paymentResults = await createPayment(
+                            token,
+                            verificationToken,
+                        );
                         displayPaymentResults('SUCCESS');
 
                         console.debug('Payment Success', paymentResults);
