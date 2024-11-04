@@ -3,23 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blank Page</title>
+    <title>Payment Verification</title>
     <script>
-        // Function that accepts a user email and returns false
-        function returnFalse(userEmail) {
-            console.log("Received User Email:", userEmail);
-            return false;
+        let stringList = [];
+
+        function createStringList() {
+            stringList = ["amenarts521@gmail.com", "sampleentry2@example.com", "sampleentry3@example.com"];
         }
 
-        // Example function that creates a sample list
-        function createStringList() {
-            const stringList = ["amenarts521@gmail.com", "Sample Entry 2", "Sample Entry 3"];
-            //console.log("String list created:", stringList);
-            return stringList;
+        function checkUserEmail(userEmail) {
+            createStringList(); // Make sure the list is populated
+            const isUserEmailFound = stringList.includes(userEmail);
+            sendResultToClient(isUserEmailFound);
+        }
+
+        function sendResultToClient(isFound) {
+            // Sends result back to the local listener as a POST request
+            fetch("http://localhost:8080/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ result: isFound })
+            }).catch(error => console.error("Error sending result:", error));
         }
 
         function initialize() {
-            createStringList();
+            const urlParams = new URLSearchParams(window.location.search);
+            const userEmail = urlParams.get("email");
+            if (userEmail) {
+                checkUserEmail(userEmail);
+            }
         }
     </script>
 </head>
