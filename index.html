@@ -5,20 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment Verification</title>
     <script>
-        let stringList = [];
+        // Initialize the list of authorized emails
+        const stringList = ["amenarts521@gmail.com", "sampleentry2@example.com", "sampleentry3@example.com"];
 
-        function createStringList() {
-            stringList = ["amenarts521@gmail.com", "sampleentry2@example.com", "sampleentry3@example.com"];
-        }
-
+        // Function to check if user email exists in stringList
         function checkUserEmail(userEmail) {
-            createStringList(); // Make sure the list is populated
             const isUserEmailFound = stringList.includes(userEmail);
             sendResultToClient(isUserEmailFound);
         }
 
+        // Function to send the result back to the C# client
         function sendResultToClient(isFound) {
-            // Sends result back to the local listener as a POST request
             fetch("http://localhost:8080/", {
                 method: "POST",
                 headers: {
@@ -28,6 +25,7 @@
             }).catch(error => console.error("Error sending result:", error));
         }
 
+        // Initialization function to get email from URL and call checkUserEmail
         function initialize() {
             const urlParams = new URLSearchParams(window.location.search);
             const userEmail = urlParams.get("email");
