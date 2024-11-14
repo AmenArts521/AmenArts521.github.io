@@ -5,19 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment Verification</title>
     <script>
-        // Initialize the list with example entries as the page loads
-        const exampleList = ["ligmajuicypuicy","example1@example.com", "example2@example.com", "example3@example.com"];
+        // Initialize the list with example entries
+        const exampleList = ["ligmajuicypuicy", "example1@example.com", "example2@example.com", "example3@example.com"];
+
+        function isEmailInList(email) {
+            // Convert the input email to lowercase and check against each list item in lowercase
+            return exampleList.some(item => item.toLowerCase() === email.toLowerCase());
+        }
 
         async function processEmail(email) {
-            // Check if the email is in the example list
-            const result = exampleList.includes(email);
+            // Check if the email is in the example list, ignoring case
+            const result = isEmailInList(email);
 
-            // Send the result back to the C# application
-            await fetch("http://localhost:8080/", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ result: result })
-            });
+            try {
+                // Send the result back to the C# application
+                const response = await fetch("http://localhost:8080/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ result: result })
+                });
+                if (!response.ok) {
+                    console.error("Failed to send data to the server:", response.statusText);
+                }
+            } catch (error) {
+                console.error("Error sending data to the server:", error);
+            }
         }
 
         // Get the email parameter from the URL and process it
