@@ -26,10 +26,22 @@
                 });
                 if (!response.ok) {
                     console.error("Failed to send data to the server:", response.statusText);
+                    displayMessage("Error: Could not verify email.");
+                    return;
                 }
             } catch (error) {
                 console.error("Error sending data to the server:", error);
+                displayMessage("Error: Could not verify email.");
+                return;
             }
+
+            // Display result message
+            displayMessage(result ? "Email is verified!" : "Email not found.");
+        }
+
+        function displayMessage(message) {
+            const messageDiv = document.getElementById("resultMessage");
+            messageDiv.textContent = message;
         }
 
         // Get the email parameter from the URL and process it
@@ -39,9 +51,11 @@
             processEmail(email);
         } else {
             console.error("No email parameter provided in the URL");
+            displayMessage("No email parameter provided in the URL.");
         }
     </script>
 </head>
 <body>
+    <div id="resultMessage" style="font-size: 1.2em; margin-top: 20px; text-align: center;"></div>
 </body>
 </html>
