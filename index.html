@@ -3,59 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Verification</title>
-    <script>
-        // Initialize the list with example entries
-        const exampleList = ["ligmajuicypuicy", "example1@example.com", "example2@example.com", "example3@example.com"];
-
-        function isEmailInList(email) {
-            // Convert the input email to lowercase and check against each list item in lowercase
-            return exampleList.some(item => item.toLowerCase() === email.toLowerCase());
+    <title>Email Check</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
         }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            width: 200px;
+        }
+        .valid {
+            color: green;
+        }
+        .invalid {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Email Check</h1>
+    <p>Enter an email to check if it's valid:</p>
+    <input type="email" id="emailInput" placeholder="Enter email" required>
+    <button onclick="checkEmail()">Check Email</button>
 
-        async function processEmail(email) {
-            // Check if the email is in the example list, ignoring case
-            const result = isEmailInList(email);
+    <div id="result"></div>
 
-            try {
-                // Send the result back to the C# application
-                const response = await fetch("http://localhost:8080/", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ result: result })
-                });
-                if (!response.ok) {
-                    console.error("Failed to send data to the server:", response.statusText);
-                    displayMessage("Error: Could not verify email.");
-                    return;
-                }
-            } catch (error) {
-                console.error("Error sending data to the server:", error);
-                displayMessage("Error: Could not verify email.");
+    <script>
+        async function checkEmail() {
+            const email = document.getElementById("emailInput").value;
+
+            // Check if the email input is not empty
+            if (!email) {
+                alert("Please enter an email address.");
                 return;
             }
 
-            // Display result message
-            displayMessage(result ? "Email is verified!" : "Email not found.");
-        }
+            // Send the request to the local server (http://localhost:8080)
+            const url = `http://localhost:8080/?email=${encodeURIComponent(email)}`;
+            try {
+                const response = await fetch(url);
 
-        function displayMessage(message) {
-            const messageDiv = document.getElementById("resultMessage");
-            messageDiv.textContent = message;
-        }
-
-        // Get the email parameter from the URL and process it
-        const urlParams = new URLSearchParams(window.location.search);
-        const email = urlParams.get('email');
-        if (email) {
-            processEmail(email);
-        } else {
-            console.error("No email parameter provided in the URL");
-            displayMessage("No email parameter provided in the URL.");
+                if (response.ok) {
+                    const data = await response.json();
+                    const resultElement = document.getElementById("result");
+                    
+                    // Display the result
+                    if (data.result === "valid") {
+                        resultElement.textContent = "Email is valid!";
+                        resultElement.className = "valid";
+                    } else {
+                        resultElement.textContent = "Email is invalid!";
+                        resultElement.className = "invalid";
+                    }
+                } else {
+                    throw new Error("Error: " + response.status);
+                }
+            } catch (error) {
+                document.getElementById("result").textContent = "Error: Unable to check email.";
+                document.getElementById("result").className = "invalid";
+            }
         }
     </script>
-</head>
-<body>
-    <div id="resultMessage" style="font-size: 1.2em; margin-top: 20px; text-align: center;"></div>
 </body>
 </html>
