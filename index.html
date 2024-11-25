@@ -6,15 +6,41 @@
     <title>Email Check</title>
     <style>
         body {
+            background-color: black;
+            color: white;
             font-family: Arial, sans-serif;
-            margin: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        input, button {
+            font-size: 16px;
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+            border: none;
+        }
+        input {
+            width: 250px;
+        }
+        button {
+            background-color: #444;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #666;
         }
         #result {
             margin-top: 20px;
             padding: 10px;
             font-size: 16px;
             border: 1px solid #ccc;
-            width: 200px;
+            width: 250px;
+            text-align: center;
+            border-radius: 5px;
         }
         .valid {
             color: green;
@@ -25,15 +51,21 @@
     </style>
 </head>
 <body>
-    <h1>Email Check</h1>
-    <p>Enter an email to check if it's valid:</p>
-    <input type="email" id="emailInput" placeholder="Enter email" required>
-    <button onclick="checkEmail()">Check Email</button>
-
-    <div id="result"></div>
+    <div>
+        <input type="email" id="emailInput" placeholder="Enter email" required>
+        <button onclick="checkEmail()">Check Email</button>
+        <div id="result"></div>
+    </div>
 
     <script>
-        async function checkEmail() {
+        // List of example emails that will be checked
+        const emailList = [
+            "test@example.com",
+            "user@domain.com",
+            "admin@website.org"
+        ];
+
+        function checkEmail() {
             const email = document.getElementById("emailInput").value;
 
             // Check if the email input is not empty
@@ -42,29 +74,18 @@
                 return;
             }
 
-            // Send the request to the local server (http://localhost:8080)
-            const url = `http://localhost:8080/?email=${encodeURIComponent(email)}`;
-            try {
-                const response = await fetch(url);
+            // Check if the email is in the emailList
+            const isValidEmail = emailList.includes(email);
 
-                if (response.ok) {
-                    const data = await response.json();
-                    const resultElement = document.getElementById("result");
-                    
-                    // Display the result
-                    if (data.result === "valid") {
-                        resultElement.textContent = "Email is valid!";
-                        resultElement.className = "valid";
-                    } else {
-                        resultElement.textContent = "Email is invalid!";
-                        resultElement.className = "invalid";
-                    }
-                } else {
-                    throw new Error("Error: " + response.status);
-                }
-            } catch (error) {
-                document.getElementById("result").textContent = "Error: Unable to check email.";
-                document.getElementById("result").className = "invalid";
+            const resultElement = document.getElementById("result");
+
+            // Display the result based on the check
+            if (isValidEmail) {
+                resultElement.textContent = "Email is valid!";
+                resultElement.className = "valid";
+            } else {
+                resultElement.textContent = "Email is invalid!";
+                resultElement.className = "invalid";
             }
         }
     </script>
