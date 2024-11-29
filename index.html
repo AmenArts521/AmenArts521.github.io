@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Constant String Array</title>
+    <title>Email List JSON</title>
 </head>
 <body>
     <script>
@@ -14,9 +14,17 @@
             "example2@example.com",
             "example3@example.com"
         ];
-        
-        // For debugging purposes, log the array to the console
-        console.log(emailList);
+
+        // Convert the array to a JSON object
+        const jsonObject = {
+            emailList: emailList
+        };
+
+        // Log the JSON object to the console for debugging
+        console.log(JSON.stringify(jsonObject));
+
+        // Output the JSON object to the body as text
+        document.body.innerHTML = `<pre>${JSON.stringify(jsonObject, null, 2)}</pre>`;
     </script>
 </body>
 </html>
