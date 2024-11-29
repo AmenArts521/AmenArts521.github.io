@@ -3,91 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Email Check</title>
+    <title>Email List</title>
     <style>
         body {
-            background-color: black;
-            color: white;
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
             margin: 0;
+            background-color: white;
+            color: black;
         }
-        input, button {
-            font-size: 16px;
+        pre {
+            font-family: monospace;
             padding: 10px;
-            margin: 5px;
-            border-radius: 5px;
-            border: none;
-        }
-        input {
-            width: 250px;
-        }
-        button {
-            background-color: #444;
-            color: white;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #666;
-        }
-        #result {
-            margin-top: 20px;
-            padding: 10px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            width: 250px;
-            text-align: center;
-            border-radius: 5px;
-        }
-        .valid {
-            color: green;
-        }
-        .invalid {
-            color: red;
+            background: #f4f4f4;
+            border: 1px solid #ddd;
+            display: inline-block;
         }
     </style>
 </head>
 <body>
-    <div>
-        <input type="email" id="emailInput" placeholder="Enter email" required>
-        <button onclick="checkEmail()">Check Email</button>
-        <div id="result"></div>
-    </div>
-
+    <h1>Email List</h1>
+    <pre id="email-list"></pre>
     <script>
-        // List of example emails that will be checked
         const emailList = [
-            "test@example.com",
-            "user@domain.com",
-            "admin@website.org"
+            "email1@example.com",
+            "email2@example.com",
+            "email3@example.com"
         ];
 
-        function checkEmail() {
-            const email = document.getElementById("emailInput").value;
-
-            // Check if the email input is not empty
-            if (!email) {
-                alert("Please enter an email address.");
-                return;
-            }
-
-            // Check if the email is in the emailList
-            const isValidEmail = emailList.includes(email);
-
-            const resultElement = document.getElementById("result");
-
-            // Display the result based on the check
-            if (isValidEmail) {
-                resultElement.textContent = "Email is valid!";
-                resultElement.className = "valid";
-            } else {
-                resultElement.textContent = "Email is invalid!";
-                resultElement.className = "invalid";
-            }
-        }
+        // Display the email list on the page
+        document.getElementById('email-list').innerText = JSON.stringify(emailList, null, 2);
     </script>
 </body>
 </html>
